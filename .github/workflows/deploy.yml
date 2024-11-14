@@ -1,10 +1,10 @@
 name: Deploy
 
 on:
-  workflow_dispatch: {}
   push:
     branches:
-      - main
+    - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -12,22 +12,24 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
-  cancel-in-progress: true
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   deploy:
-    permissions:
-      # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
-      pages: write      # to deploy to Pages
-      id-token: write   # to verify the deployment originates from an appropriate source
-
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
