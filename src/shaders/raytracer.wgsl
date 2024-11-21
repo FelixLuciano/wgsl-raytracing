@@ -186,9 +186,13 @@ fn check_ray_collision(r: ray, max: f32) -> hit_record
 // TODO
 fn lambertian(normal : vec3f, absorption: f32, random_sphere: vec3f, rng_state: ptr<function, u32>) -> material_behaviour
 {
-  var direction = normalize(normal + random_sphere);
+  var direction = normal + random_sphere;
+  
+  if (length(direction) < 0.001) {
+    direction = normal;
+  }
 
-  return material_behaviour(true, direction);
+  return material_behaviour(true, normalize(direction));
 }
 
 // TODO
