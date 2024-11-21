@@ -151,6 +151,7 @@ fn envoriment_color(direction: vec3f, color1: vec3f, color2: vec3f) -> vec3f
   return col;
 }
 
+// TODO
 fn check_ray_collision(r: ray, max: f32) -> hit_record
 {
   var spheresCount = i32(uniforms[19]);
@@ -159,8 +160,25 @@ fn check_ray_collision(r: ray, max: f32) -> hit_record
   var trianglesCount = i32(uniforms[22]);
   var meshCount = i32(uniforms[27]);
 
-  var record = hit_record(RAY_TMAX, vec3f(0.0), vec3f(0.0), vec4f(0.0), vec4f(0.0), false, false);
+  var ray_t = RAY_TMAX;
+  var record = hit_record(ray_t, vec3f(0.0), vec3f(0.0), vec4f(0.0), vec4f(0.0), false, false);
   var closest = record;
+
+  // check for collision in each sphere
+  for (var index = 0; index < spheresCount; index++)
+  {
+    var sphere = spheresb[index];
+
+    hit_sphere(sphere.transform.xyz, sphere.transform.w, r, &record, ray_t);
+
+    if(record.hit_anything && record.t < closest.t )
+    {
+      record.object_color = sphere.color;
+      record.object_material = sphere.material;
+      ray_t = record.t;
+      closest = record;
+    }
+  }
 
   return closest;
 }
