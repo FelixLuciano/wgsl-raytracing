@@ -183,16 +183,19 @@ fn check_ray_collision(r: ray, max: f32) -> hit_record
   return closest;
 }
 
+// TODO
 fn lambertian(normal : vec3f, absorption: f32, random_sphere: vec3f, rng_state: ptr<function, u32>) -> material_behaviour
 {
-  return material_behaviour(true, vec3f(0.0));
+  return material_behaviour(true, normal);
 }
 
+// TODO
 fn metal(normal : vec3f, direction: vec3f, fuzz: f32, random_sphere: vec3f) -> material_behaviour
 {
   return material_behaviour(false, vec3f(0.0));
 }
 
+// TODO (when smoothness < 0.0)
 fn dielectric(normal : vec3f, r_direction: vec3f, refraction_index: f32, frontface: bool, random_sphere: vec3f, fuzz: f32, rng_state: ptr<function, u32>) -> material_behaviour
 {  
   return material_behaviour(false, vec3f(0.0));
@@ -200,28 +203,56 @@ fn dielectric(normal : vec3f, r_direction: vec3f, refraction_index: f32, frontfa
 
 fn emmisive(color: vec3f, light: f32) -> material_behaviour
 {
-  return material_behaviour(false, vec3f(0.0));
+  return material_behaviour(false, color * light);
 }
 
+// TODO
 fn trace(r: ray, rng_state: ptr<function, u32>) -> vec3f
 {
   var maxbounces = i32(uniforms[2]);
   var light = vec3f(0.0);
   var color = vec3f(1.0);
   var r_ = r;
-  
+  var rng_float = rng_next_float(rng_state);
+  var rng_sphere = rng_next_vec3_in_unit_sphere(rng_state);
   var backgroundcolor1 = int_to_rgb(i32(uniforms[11]));
   var backgroundcolor2 = int_to_rgb(i32(uniforms[12]));
   var behaviour = material_behaviour(true, vec3f(0.0));
 
   for (var j = 0; j < maxbounces; j = j + 1)
   {
+    var colision = check_ray_collision(r_, RAY_TMAX);
 
+    if(!colision.hit_anything)
+    {
+      light += color * envoriment_color(r_.direction, backgroundcolor1, backgroundcolor2);
+      break;
+    }
+
+    // Get the material properties
+    var smoothness = colision.object_material.x;
+    var absorption = colision.object_material.y;
+    var specular = colision.object_material.z;
+    var emission = colision.object_material.w;
+    var obj_color = colision.object_color.xyz;
+
+    if (emission > 0.0)
+    {
+      var emissive_color = emmisive(obj_color, emission);
+
+      light += color * emissive_color.direction;
+    }
+
+    behaviour = lambertian(colision.normal, absorption, rng_sphere, rng_state);
+    color *= obj_color * (1.0 - absorption);
+
+    r_ = ray(colision.p, behaviour.direction);
   }
 
   return light;
 }
 
+// TODO
 @compute @workgroup_size(THREAD_COUNT, THREAD_COUNT, 1)
 fn render(@builtin(global_invocation_id) id : vec3u)
 {
@@ -243,19 +274,19 @@ fn render(@builtin(global_invocation_id) id : vec3u)
     var cam = get_camera(lookfrom, lookat, vec3(0.0, 1.0, 0.0), uniforms[10], 1.0, uniforms[6], uniforms[5]);
     var samples_per_pixel = i32(uniforms[4]);
 
-    var color = vec3(rng_next_float(&rng_state), rng_next_float(&rng_state), rng_next_float(&rng_state));
+    var color = vec3(0.0);
 
     // Steps:
     // 1. Loop for each sample per pixel
-    // 2. Get ray
-    // 3. Call trace function
-    // 4. Average the color
-    for (var index = 0; index < samples_per_pixel; index++) {
+    for (var sample_index = 0; sample_index < samples_per_pixel; sample_index++) {
+      // 2. Get ray
       var ray = get_ray(cam, uv, &rng_state);
 
+      // 3. Call trace function
       color += trace(ray, &rng_state);
     }
 
+    // 4. Average the color
     color /= f32(samples_per_pixel);
 
     var color_out = vec4(linear_to_gamma(color), 1.0);
