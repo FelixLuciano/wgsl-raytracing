@@ -198,7 +198,9 @@ fn lambertian(normal : vec3f, absorption: f32, random_sphere: vec3f, rng_state: 
 // TODO
 fn metal(normal : vec3f, direction: vec3f, fuzz: f32, random_sphere: vec3f) -> material_behaviour
 {
-  return material_behaviour(false, vec3f(0.0));
+  var reflection = normalize(reflect(direction, normal) + (fuzz * random_sphere));
+
+  return material_behaviour(true, reflection);
 }
 
 // TODO (when smoothness < 0.0)
