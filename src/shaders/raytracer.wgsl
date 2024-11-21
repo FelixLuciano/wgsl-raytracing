@@ -234,6 +234,7 @@ fn trace(r: ray, rng_state: ptr<function, u32>) -> vec3f
     if(!colision.hit_anything)
     {
       light += color * envoriment_color(r_.direction, backgroundcolor1, backgroundcolor2);
+
       break;
     }
 
@@ -243,18 +244,20 @@ fn trace(r: ray, rng_state: ptr<function, u32>) -> vec3f
     var specular = colision.object_material.z;
     var emission = colision.object_material.w;
     var obj_color = colision.object_color.xyz;
+    var ray_origin = colision.p + colision.normal * 0.001;
 
     if (emission > 0.0)
     {
       var emissive_color = emmisive(obj_color, emission);
 
       light += color * emissive_color.direction;
+      break;
     }
 
     behaviour = lambertian(colision.normal, absorption, rng_sphere, rng_state);
     color *= obj_color * (1.0 - absorption);
 
-    r_ = ray(colision.p, behaviour.direction);
+    r_ = ray(ray_origin, behaviour.direction);
   }
 
   return light;
