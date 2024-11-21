@@ -1,23 +1,36 @@
+<!DOCTYPE html>
 <html>
-  <head>
-    <style>
-      canvas {
-        /* border: 1px solid rgb(255, 255, 255); */
-      }
+<head>
 
-      .lil-gui.autoPlace {
-        /* width: 15%; */
-        right: 0;
-      }
-    </style>
-  </head>
-  <head>
-    <script src=https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.3.0/math.min.js></script>
+  <title>WGSL Raytracing</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background-color: #111111;
+      display: grid;
+      place-items: center;
+    }
+    canvas {
+      border-radius: .6rem;
+      border: 1px solid #414141;
+      transform: translateX(-8rem);
+    }
+    .lil-gui.root {
+      width: 16rem;
+    }
+  </style>
+  <script src=https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.3.0/math.min.js></script>
+
 </head>
+<body>
 
-  <body style="background-color:black;">
     <script src="https://cdn.jsdelivr.net/npm/lil-gui@0.17"></script>
     <script type="module" src="main.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
-  </body>
+
+</body>
 </html>
