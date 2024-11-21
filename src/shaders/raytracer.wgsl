@@ -254,8 +254,20 @@ fn trace(r: ray, rng_state: ptr<function, u32>) -> vec3f
       break;
     }
 
-    behaviour = lambertian(colision.normal, absorption, rng_sphere, rng_state);
-    color *= obj_color * (1.0 - absorption);
+    if (smoothness >= 0.0 && specular > rng_float)
+    {
+        behaviour = metal(colision.normal, r_.direction, absorption, rng_sphere);
+    }
+    else if (smoothness >= 0.0)
+    {
+      behaviour = lambertian(colision.normal, absorption, rng_sphere, rng_state);
+      color *= colision.object_color.xyz * (1.0 - absorption);
+    }
+    else
+    {
+      behaviour = dielectric(colision.normal, r_.direction, specular, colision.frontface, rng_sphere, absorption, rng_state);
+      ray_origin = colision.p - colision.normal * 0.001;
+    }
 
     r_ = ray(ray_origin, behaviour.direction);
   }
