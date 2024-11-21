@@ -183,7 +183,6 @@ fn check_ray_collision(r: ray, max: f32) -> hit_record
   return closest;
 }
 
-// TODO
 fn lambertian(normal : vec3f, absorption: f32, random_sphere: vec3f, rng_state: ptr<function, u32>) -> material_behaviour
 {
   var direction = normal + random_sphere;
@@ -205,7 +204,7 @@ fn metal(normal : vec3f, direction: vec3f, fuzz: f32, random_sphere: vec3f) -> m
 
 // TODO (when smoothness < 0.0)
 fn dielectric(normal : vec3f, r_direction: vec3f, refraction_index: f32, frontface: bool, random_sphere: vec3f, fuzz: f32, rng_state: ptr<function, u32>) -> material_behaviour
-{  
+{
   return material_behaviour(false, vec3f(0.0));
 }
 
@@ -251,6 +250,7 @@ fn trace(r: ray, rng_state: ptr<function, u32>) -> vec3f
       var emissive_color = emmisive(obj_color, emission);
 
       light += color * emissive_color.direction;
+
       break;
     }
 
@@ -266,7 +266,13 @@ fn trace(r: ray, rng_state: ptr<function, u32>) -> vec3f
     else
     {
       behaviour = dielectric(colision.normal, r_.direction, specular, colision.frontface, rng_sphere, absorption, rng_state);
+      color *= colision.object_color.xyz * (1.0 - absorption);
       ray_origin = colision.p - colision.normal * 0.001;
+    }
+
+    if (!behaviour.scatter) 
+    {
+      break;
     }
 
     r_ = ray(ray_origin, behaviour.direction);
