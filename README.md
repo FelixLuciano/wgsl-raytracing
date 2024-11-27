@@ -21,5 +21,5 @@ Você pode controlar qualquer parametro com o GUI ao lado.
 
 **Copyright &copy; 2024 Gustavo Beltrão Braga**
 
-This project is [MIT licensed](https://github.com/FelixLuciano/gabriel-iot-challenge/blob/main/LICENSE).
+This project is [MIT licensed](LICENSE).
 
